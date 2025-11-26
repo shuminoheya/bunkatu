@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>統合HTML表示</title>
+<script>
+async function loadAndMerge() {
+  const parts = ["1.txt","2.txt","3.txt","4.txt","5.txt","6.txt"];
+  const buffers = [];
+  for (let i = 0; i < parts.length; i++) {
+    const resp = await fetch(parts[i]);
+    const buf = await resp.arrayBuffer();
+    buffers.push(new Uint8Array(buf));
+  }
+  const totalLen = buffers.reduce((s,u)=>s+u.length,0);
+  const merged = new Uint8Array(totalLen);
+  let off = 0;
+  for (const u8 of buffers) { merged.set(u8, off); off += u8.length; }
+  const decoder = new TextDecoder("utf-8");
+  const htmlText = decoder.decode(merged);
+  document.open();
+  document.write(htmlText);
+  document.close();
+}
+window.onload = loadAndMerge;
+</script>
+</head>
+<body>
+</body>
+</html>
