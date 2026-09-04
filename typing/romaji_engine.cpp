@@ -69,7 +69,7 @@ static void add_basic(const char* kana){
     {"だ",{"da"}},{"ぢ",{"ji","di"}},{"づ",{"zu","du"}},{"で",{"de"}},{"ど",{"do"}},
     {"ば",{"ba"}},{"び",{"bi"}},{"ぶ",{"bu"}},{"べ",{"be"}},{"ぼ",{"bo"}},
     {"ぱ",{"pa"}},{"ぴ",{"pi"}},{"ぷ",{"pu"}},{"ぺ",{"pe"}},{"ぽ",{"po"}},
-    {"ん",{"n","nn","n'"}},{"ー",{"-"}},{" ",{" "}},{"　",{" ","　"}},
+    {"ん",{"n","nn","n'"}},{"ゔ",{"vu"}},{"ゐ",{"wi"}},{"ゑ",{"we"}},{"ー",{"-"}},{" ",{" "}},{"　",{" ","　"}},
     {nullptr,{nullptr}}
   };
   for(int i=0;t[i].k;++i){if(ascii_equal(kana,slen(kana),t[i].k)){for(int j=0;j<6&&t[i].a[j];++j)add_unique(t[i].a[j]);return;}}
@@ -82,74 +82,150 @@ static void add_basic(const char* kana){
   else if(ascii_equal(kana,slen(kana),"ゅ")){add_unique("xyu");add_unique("lyu");}
   else if(ascii_equal(kana,slen(kana),"ょ")){add_unique("xyo");add_unique("lyo");}
   else if(ascii_equal(kana,slen(kana),"ゎ")){add_unique("xwa");add_unique("lwa");}
+  else if(ascii_equal(kana,slen(kana),"ゕ")){add_unique("xka");add_unique("lka");}
+  else if(ascii_equal(kana,slen(kana),"ゖ")){add_unique("xke");add_unique("lke");}
 }
 
-static void add_youon(const char* r0,const char* r1,const char* r2,const char* r3,const char* vowel,const char* sx,const char* sl){
-  const char* r[4]={r0,r1,r2,r3};
-  for(int i=0;i<4;++i){if(!r[i])continue;char b[40];smemcpy(b,r[i],slen(r[i]));int q=slen(r[i]);smemcpy(b+q,vowel,slen(vowel));b[q+slen(vowel)]=0;add_unique(b);smemcpy(b,r[i],slen(r[i]));q=slen(r[i]);smemcpy(b+q,sx,slen(sx));b[q+slen(sx)]=0;add_unique(b);smemcpy(b,r[i],slen(r[i]));q=slen(r[i]);smemcpy(b+q,sl,slen(sl));b[q+slen(sl)]=0;add_unique(b);}
+static void add_youon(const char* r0,const char* r1,const char* r2,const char* r3,const char* r4,
+                       const char* vowel,const char* sx,const char* sl){
+  const char* r[5]={r0,r1,r2,r3,r4};
+  for(int i=0;i<5;++i){
+    if(!r[i]) continue;
+    char b[48];
+    int q=slen(r[i]);
+    smemcpy(b,r[i],q);
+    b[q]=0;
+    /* 通常形: kya / sha / cha ... */
+    smemcpy(b+q,vowel,slen(vowel));
+    b[q+slen(vowel)]=0;
+    add_unique(b);
+
+    /* x/l 明示形は「i」で終わる既存表記だけに付ける。
+       例: shixya / shilya, kixya / kilya
+       kxya や kyxya のような不自然な形は生成しない。 */
+    if(r[i][0] && r[i][q-1]=='i'){
+      smemcpy(b,r[i],q);
+      smemcpy(b+q,sx,slen(sx));
+      b[q+slen(sx)]=0;
+      add_unique(b);
+      smemcpy(b,r[i],q);
+      smemcpy(b+q,sl,slen(sl));
+      b[q+slen(sl)]=0;
+      add_unique(b);
+    }
+  }
 }
 
 static void generate_normal_candidates(const char* kana){
   candidate_len=0; add_basic(kana);
-  if(ascii_equal(kana,slen(kana),"きゃ"))add_youon("k","ky","ki",nullptr,"a","xya","lya");
-  else if(ascii_equal(kana,slen(kana),"きゅ"))add_youon("k","ky","ki",nullptr,"u","xyu","lyu");
-  else if(ascii_equal(kana,slen(kana),"きょ"))add_youon("k","ky","ki",nullptr,"o","xyo","lyo");
-  else if(ascii_equal(kana,slen(kana),"しゃ"))add_youon("sh","sy","si","shi","a","xya","lya");
-  else if(ascii_equal(kana,slen(kana),"しゅ"))add_youon("sh","sy","si","shi","u","xyu","lyu");
-  else if(ascii_equal(kana,slen(kana),"しょ"))add_youon("sh","sy","si","shi","o","xyo","lyo");
-  else if(ascii_equal(kana,slen(kana),"ちゃ"))add_youon("ch","ty","ti","chi","a","xya","lya");
-  else if(ascii_equal(kana,slen(kana),"ちゅ"))add_youon("ch","ty","ti","chi","u","xyu","lyu");
-  else if(ascii_equal(kana,slen(kana),"ちょ"))add_youon("ch","ty","ti","chi","o","xyo","lyo");
-  else if(ascii_equal(kana,slen(kana),"じゃ"))add_youon("j","jy","zy","zi","a","xya","lya");
-  else if(ascii_equal(kana,slen(kana),"じゅ"))add_youon("j","jy","zy","zi","u","xyu","lyu");
-  else if(ascii_equal(kana,slen(kana),"じょ"))add_youon("j","jy","zy","zi","o","xyo","lyo");
-  else if(ascii_equal(kana,slen(kana),"にゃ"))add_youon("n","ny","ni",nullptr,"a","xya","lya");
-  else if(ascii_equal(kana,slen(kana),"にゅ"))add_youon("n","ny","ni",nullptr,"u","xyu","lyu");
-  else if(ascii_equal(kana,slen(kana),"にょ"))add_youon("n","ny","ni",nullptr,"o","xyo","lyo");
-  else if(ascii_equal(kana,slen(kana),"ひゃ"))add_youon("h","hy","hi",nullptr,"a","xya","lya");
-  else if(ascii_equal(kana,slen(kana),"ひゅ"))add_youon("h","hy","hi",nullptr,"u","xyu","lyu");
-  else if(ascii_equal(kana,slen(kana),"ひょ"))add_youon("h","hy","hi",nullptr,"o","xyo","lyo");
-  else if(ascii_equal(kana,slen(kana),"みゃ"))add_youon("m","my","mi",nullptr,"a","xya","lya");
-  else if(ascii_equal(kana,slen(kana),"みゅ"))add_youon("m","my","mi",nullptr,"u","xyu","lyu");
-  else if(ascii_equal(kana,slen(kana),"みょ"))add_youon("m","my","mi",nullptr,"o","xyo","lyo");
-  else if(ascii_equal(kana,slen(kana),"りゃ"))add_youon("r","ry","ri",nullptr,"a","xya","lya");
-  else if(ascii_equal(kana,slen(kana),"りゅ"))add_youon("r","ry","ri",nullptr,"u","xyu","lyu");
-  else if(ascii_equal(kana,slen(kana),"りょ"))add_youon("r","ry","ri",nullptr,"o","xyo","lyo");
-  else if(ascii_equal(kana,slen(kana),"ぎゃ"))add_youon("g","gy","gi",nullptr,"a","xya","lya");
-  else if(ascii_equal(kana,slen(kana),"ぎゅ"))add_youon("g","gy","gi",nullptr,"u","xyu","lyu");
-  else if(ascii_equal(kana,slen(kana),"ぎょ"))add_youon("g","gy","gi",nullptr,"o","xyo","lyo");
-  else if(ascii_equal(kana,slen(kana),"ぢゃ"))add_youon("d","dy","di",nullptr,"a","xya","lya");
-  else if(ascii_equal(kana,slen(kana),"ぢゅ"))add_youon("d","dy","di",nullptr,"u","xyu","lyu");
-  else if(ascii_equal(kana,slen(kana),"ぢょ"))add_youon("d","dy","di",nullptr,"o","xyo","lyo");
-  else if(ascii_equal(kana,slen(kana),"びゃ"))add_youon("b","by","bi",nullptr,"a","xya","lya");
-  else if(ascii_equal(kana,slen(kana),"びゅ"))add_youon("b","by","bi",nullptr,"u","xyu","lyu");
-  else if(ascii_equal(kana,slen(kana),"びょ"))add_youon("b","by","bi",nullptr,"o","xyo","lyo");
-  else if(ascii_equal(kana,slen(kana),"ぴゃ"))add_youon("p","py","pi",nullptr,"a","xya","lya");
-  else if(ascii_equal(kana,slen(kana),"ぴゅ"))add_youon("p","py","pi",nullptr,"u","xyu","lyu");
-  else if(ascii_equal(kana,slen(kana),"ぴょ"))add_youon("p","py","pi",nullptr,"o","xyo","lyo");
 
+  /* 拗音: 標準表記 + i終端表記の x/l 明示 */
+  if(ascii_equal(kana,slen(kana),"きゃ"))add_youon("k","ky","ki",nullptr,nullptr,"a","xya","lya");
+  else if(ascii_equal(kana,slen(kana),"きゅ"))add_youon("k","ky","ki",nullptr,nullptr,"u","xyu","lyu");
+  else if(ascii_equal(kana,slen(kana),"きょ"))add_youon("k","ky","ki",nullptr,nullptr,"o","xyo","lyo");
+
+  else if(ascii_equal(kana,slen(kana),"しゃ"))add_youon("sh","sy","si","shi",nullptr,"a","xya","lya");
+  else if(ascii_equal(kana,slen(kana),"しゅ"))add_youon("sh","sy","si","shi",nullptr,"u","xyu","lyu");
+  else if(ascii_equal(kana,slen(kana),"しょ"))add_youon("sh","sy","si","shi",nullptr,"o","xyo","lyo");
+
+  else if(ascii_equal(kana,slen(kana),"ちゃ"))add_youon("ch","ty","ti","chi",nullptr,"a","xya","lya");
+  else if(ascii_equal(kana,slen(kana),"ちゅ"))add_youon("ch","ty","ti","chi",nullptr,"u","xyu","lyu");
+  else if(ascii_equal(kana,slen(kana),"ちょ"))add_youon("ch","ty","ti","chi",nullptr,"o","xyo","lyo");
+
+  else if(ascii_equal(kana,slen(kana),"じゃ"))add_youon("j","jy","zy","zi","ji","a","xya","lya");
+  else if(ascii_equal(kana,slen(kana),"じゅ"))add_youon("j","jy","zy","zi","ji","u","xyu","lyu");
+  else if(ascii_equal(kana,slen(kana),"じょ"))add_youon("j","jy","zy","zi","ji","o","xyo","lyo");
+
+  else if(ascii_equal(kana,slen(kana),"にゃ"))add_youon("ny","ni",nullptr,nullptr,nullptr,"a","xya","lya");
+  else if(ascii_equal(kana,slen(kana),"にゅ"))add_youon("ny","ni",nullptr,nullptr,nullptr,"u","xyu","lyu");
+  else if(ascii_equal(kana,slen(kana),"にょ"))add_youon("ny","ni",nullptr,nullptr,nullptr,"o","xyo","lyo");
+
+  else if(ascii_equal(kana,slen(kana),"ひゃ"))add_youon("hy","hi",nullptr,nullptr,nullptr,"a","xya","lya");
+  else if(ascii_equal(kana,slen(kana),"ひゅ"))add_youon("hy","hi",nullptr,nullptr,nullptr,"u","xyu","lyu");
+  else if(ascii_equal(kana,slen(kana),"ひょ"))add_youon("hy","hi",nullptr,nullptr,nullptr,"o","xyo","lyo");
+
+  else if(ascii_equal(kana,slen(kana),"みゃ"))add_youon("my","mi",nullptr,nullptr,nullptr,"a","xya","lya");
+  else if(ascii_equal(kana,slen(kana),"みゅ"))add_youon("my","mi",nullptr,nullptr,nullptr,"u","xyu","lyu");
+  else if(ascii_equal(kana,slen(kana),"みょ"))add_youon("my","mi",nullptr,nullptr,nullptr,"o","xyo","lyo");
+
+  else if(ascii_equal(kana,slen(kana),"りゃ"))add_youon("ry","ri",nullptr,nullptr,nullptr,"a","xya","lya");
+  else if(ascii_equal(kana,slen(kana),"りゅ"))add_youon("ry","ri",nullptr,nullptr,nullptr,"u","xyu","lyu");
+  else if(ascii_equal(kana,slen(kana),"りょ"))add_youon("ry","ri",nullptr,nullptr,nullptr,"o","xyo","lyo");
+
+  else if(ascii_equal(kana,slen(kana),"ぎゃ"))add_youon("gy","gi",nullptr,nullptr,nullptr,"a","xya","lya");
+  else if(ascii_equal(kana,slen(kana),"ぎゅ"))add_youon("gy","gi",nullptr,nullptr,nullptr,"u","xyu","lyu");
+  else if(ascii_equal(kana,slen(kana),"ぎょ"))add_youon("gy","gi",nullptr,nullptr,nullptr,"o","xyo","lyo");
+
+  else if(ascii_equal(kana,slen(kana),"ぢゃ"))add_youon("dy","di",nullptr,nullptr,nullptr,"a","xya","lya");
+  else if(ascii_equal(kana,slen(kana),"ぢゅ"))add_youon("dy","di",nullptr,nullptr,nullptr,"u","xyu","lyu");
+  else if(ascii_equal(kana,slen(kana),"ぢょ"))add_youon("dy","di",nullptr,nullptr,nullptr,"o","xyo","lyo");
+
+  else if(ascii_equal(kana,slen(kana),"びゃ"))add_youon("by","bi",nullptr,nullptr,nullptr,"a","xya","lya");
+  else if(ascii_equal(kana,slen(kana),"びゅ"))add_youon("by","bi",nullptr,nullptr,nullptr,"u","xyu","lyu");
+  else if(ascii_equal(kana,slen(kana),"びょ"))add_youon("by","bi",nullptr,nullptr,nullptr,"o","xyo","lyo");
+
+  else if(ascii_equal(kana,slen(kana),"ぴゃ"))add_youon("py","pi",nullptr,nullptr,nullptr,"a","xya","lya");
+  else if(ascii_equal(kana,slen(kana),"ぴゅ"))add_youon("py","pi",nullptr,nullptr,nullptr,"u","xyu","lyu");
+  else if(ascii_equal(kana,slen(kana),"ぴょ"))add_youon("py","pi",nullptr,nullptr,nullptr,"o","xyo","lyo");
+
+  /* 外来音: 自動で x/l を付けない。一般的な入力だけ。 */
   if(ascii_equal(kana,slen(kana),"ふぁ")){add_unique("fa");add_unique("fwa");}
   else if(ascii_equal(kana,slen(kana),"ふぃ")){add_unique("fi");add_unique("fwi");}
   else if(ascii_equal(kana,slen(kana),"ふぇ")){add_unique("fe");add_unique("fwe");}
   else if(ascii_equal(kana,slen(kana),"ふぉ")){add_unique("fo");add_unique("fwo");}
-  else if(ascii_equal(kana,slen(kana),"うぃ"))add_unique("wi");
-  else if(ascii_equal(kana,slen(kana),"うぇ"))add_unique("we");
+  else if(ascii_equal(kana,slen(kana),"ふゅ")){add_unique("fyu");}
+  else if(ascii_equal(kana,slen(kana),"うぃ")){add_unique("wi");add_unique("wyi");}
+  else if(ascii_equal(kana,slen(kana),"うぇ")){add_unique("we");}
   else if(ascii_equal(kana,slen(kana),"うぉ")){add_unique("who");add_unique("wo");}
   else if(ascii_equal(kana,slen(kana),"しぇ")){add_unique("she");add_unique("sye");}
   else if(ascii_equal(kana,slen(kana),"じぇ")){add_unique("je");add_unique("jye");add_unique("zye");}
   else if(ascii_equal(kana,slen(kana),"ちぇ")){add_unique("che");add_unique("cye");add_unique("tye");}
-  else if(ascii_equal(kana,slen(kana),"てぃ"))add_unique("thi");
-  else if(ascii_equal(kana,slen(kana),"でぃ"))add_unique("dhi");
-  else if(ascii_equal(kana,slen(kana),"とぅ"))add_unique("twu");
-  else if(ascii_equal(kana,slen(kana),"どぅ"))add_unique("dwu");
-  else if(ascii_equal(kana,slen(kana),"つぁ"))add_unique("tsa");
-  else if(ascii_equal(kana,slen(kana),"つぃ"))add_unique("tsi");
-  else if(ascii_equal(kana,slen(kana),"つぇ"))add_unique("tse");
-  else if(ascii_equal(kana,slen(kana),"つぉ"))add_unique("tso");
-  else if(ascii_equal(kana,slen(kana),"ゔぁ"))add_unique("va");
-  else if(ascii_equal(kana,slen(kana),"ゔぃ"))add_unique("vi");
-  else if(ascii_equal(kana,slen(kana),"ゔぇ"))add_unique("ve");
-  else if(ascii_equal(kana,slen(kana),"ゔぉ"))add_unique("vo");
+  else if(ascii_equal(kana,slen(kana),"てぃ")){add_unique("thi");add_unique("texi");add_unique("teli");}
+  else if(ascii_equal(kana,slen(kana),"でぃ")){add_unique("dhi");add_unique("dexi");add_unique("deli");}
+  else if(ascii_equal(kana,slen(kana),"とぅ")){add_unique("twu");add_unique("toxu");add_unique("tolu");}
+  else if(ascii_equal(kana,slen(kana),"どぅ")){add_unique("dwu");add_unique("doxu");add_unique("dolu");}
+  else if(ascii_equal(kana,slen(kana),"つぁ")){add_unique("tsa");}
+  else if(ascii_equal(kana,slen(kana),"つぃ")){add_unique("tsi");}
+  else if(ascii_equal(kana,slen(kana),"つぇ")){add_unique("tse");}
+  else if(ascii_equal(kana,slen(kana),"つぉ")){add_unique("tso");}
+  else if(ascii_equal(kana,slen(kana),"ゔぁ")){add_unique("va");}
+  else if(ascii_equal(kana,slen(kana),"ゔぃ")){add_unique("vi");}
+  else if(ascii_equal(kana,slen(kana),"ゔぇ")){add_unique("ve");}
+  else if(ascii_equal(kana,slen(kana),"ゔぉ")){add_unique("vo");}
+  else if(ascii_equal(kana,slen(kana),"ゔゅ")){add_unique("vyu");}
+
+  /* 小文字単体以外のよく使う特殊入力 */
+  if(ascii_equal(kana,slen(kana),"いぇ")){add_unique("ye");}
+  else if(ascii_equal(kana,slen(kana),"きぇ")){add_unique("kye");}
+  else if(ascii_equal(kana,slen(kana),"ぎぇ")){add_unique("gye");}
+  else if(ascii_equal(kana,slen(kana),"にぇ")){add_unique("nye");}
+  else if(ascii_equal(kana,slen(kana),"ひぇ")){add_unique("hye");}
+  else if(ascii_equal(kana,slen(kana),"びぇ")){add_unique("bye");}
+  else if(ascii_equal(kana,slen(kana),"ぴぇ")){add_unique("pye");}
+  else if(ascii_equal(kana,slen(kana),"みぇ")){add_unique("mye");}
+  else if(ascii_equal(kana,slen(kana),"りぇ")){add_unique("rye");}
+  else if(ascii_equal(kana,slen(kana),"すぃ")){add_unique("swi");add_unique("suxi");add_unique("suli");}
+  else if(ascii_equal(kana,slen(kana),"ずぃ")){add_unique("zwi");add_unique("zuxi");add_unique("zuli");}
+  else if(ascii_equal(kana,slen(kana),"てゅ")){add_unique("thu");add_unique("texyu");add_unique("telyu");}
+  else if(ascii_equal(kana,slen(kana),"でゅ")){add_unique("dhu");add_unique("dexyu");add_unique("delyu");}
+  else if(ascii_equal(kana,slen(kana),"とぃ")){add_unique("twi");}
+  else if(ascii_equal(kana,slen(kana),"とぇ")){add_unique("twe");}
+  else if(ascii_equal(kana,slen(kana),"とぉ")){add_unique("two");}
+  else if(ascii_equal(kana,slen(kana),"どぃ")){add_unique("dwi");}
+  else if(ascii_equal(kana,slen(kana),"どぇ")){add_unique("dwe");}
+  else if(ascii_equal(kana,slen(kana),"どぉ")){add_unique("dwo");}
+  else if(ascii_equal(kana,slen(kana),"くぁ")){add_unique("kwa");}
+  else if(ascii_equal(kana,slen(kana),"くぃ")){add_unique("kwi");}
+  else if(ascii_equal(kana,slen(kana),"くぇ")){add_unique("kwe");}
+  else if(ascii_equal(kana,slen(kana),"くぉ")){add_unique("kwo");}
+  else if(ascii_equal(kana,slen(kana),"ぐぁ")){add_unique("gwa");}
+  else if(ascii_equal(kana,slen(kana),"ぐぃ")){add_unique("gwi");}
+  else if(ascii_equal(kana,slen(kana),"ぐぇ")){add_unique("gwe");}
+  else if(ascii_equal(kana,slen(kana),"ぐぉ")){add_unique("gwo");}
+  else if(ascii_equal(kana,slen(kana),"うぁ")){add_unique("wha");}
+  else if(ascii_equal(kana,slen(kana),"うぃ")){add_unique("wi");add_unique("wyi");}
+  else if(ascii_equal(kana,slen(kana),"うぇ")){add_unique("we");}
+  else if(ascii_equal(kana,slen(kana),"うぉ")){add_unique("who");add_unique("wo");}
 }
 
 static int cp_len(const char* p,int rem){unsigned char c=(unsigned char)p[0];if(c<0x80)return 1;if((c&0xE0)==0xC0&&rem>=2)return 2;if((c&0xF0)==0xE0&&rem>=3)return 3;if((c&0xF8)==0xF0&&rem>=4)return 4;return 1;}
@@ -259,7 +335,7 @@ int engine_finished(){return idx_state>=token_count && typed_len>0 && input_len=
 int engine_pending_end(){return ambiguous_end;}
 
 int engine_key(int key){
-  if(!((key>='a'&&key<='z')||key=='-'||key==' '))return 0;
+  if(!((key>='a'&&key<='z')||key=='-'||key==' '||key=='\''))return 0;
   if(typed_len+1>=MAX_STREAM_BYTES)return 0;
   typed_stream[typed_len++]=(char)key; typed_stream[typed_len]=0;
   recompute_parse();
