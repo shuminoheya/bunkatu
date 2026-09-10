@@ -1,1 +1,0 @@
-GPS Telemetry fixed map version. GitHub Pages等HTTPSで利用してください。地図範囲は北/南/西/東を指定できます。OpenCage APIキーは公開JSに含まれるため、公開運用ではドメイン制限を推奨します。
