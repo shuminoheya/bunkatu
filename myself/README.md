@@ -1,0 +1,44 @@
+# GPS Telemetry - GitHub Pages版
+
+このフォルダをそのままGitHub Pagesの公開ディレクトリに置いてください。
+
+## ファイル
+- index.html
+- gps.js
+- gps.wasm
+
+## GitHub Pages
+1. GitHubリポジトリを作成
+2. 3ファイルを同じ階層へアップロード
+3. Settings → Pages
+4. Deploy from a branch
+5. main / root を選択
+6. 公開された HTTPS URL を開く
+7. ブラウザの位置情報を許可
+
+## 機能
+- 通常モード
+- ✈️ 飛行機モード
+- 🚆 電車モード
+- 緯度 / 経度
+- GPS高度 m / ft
+- 速度
+- GPS精度
+- GPS進行方向
+- 端末方位センサー
+- OpenCage住所取得
+- Leaflet地図
+- 北 / 南 / 西 / 東による地図範囲指定
+- GPS自動追従 ON/OFF
+- 現在地へ移動
+- 範囲指定解除
+- LIVE LOG
+
+## 注意
+Geolocation API は HTTPS のページで使用してください。
+GitHub Pages は HTTPS なので対応しています。
+
+gps.wasm は小さなWASM処理モジュールです。
+GPSの取得そのものはブラウザのGeolocation APIを使用します。
+
+OpenCage APIキーはクライアント側から見えるため、公開運用時はOpenCage側で利用元ドメインを制限してください。
