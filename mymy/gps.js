@@ -71,12 +71,50 @@ function setupOrientation(){
 function initMap(){
  map=L.map("map",{preferCanvas:true}).setView([34.5,131],8);L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"&copy; OpenStreetMap contributors"}).addTo(map);marker=L.marker([34.5,131]).addTo(map);accuracyCircle=L.circle([34.5,131],{radius:0}).addTo(map);setTimeout(()=>map.invalidateSize(),100);window.addEventListener("resize",()=>map.invalidateSize())
 }
-document.addEventListener("DOMContentLoaded",()=>{
- initMap();setupOrientation();loadWasm();
- document.querySelectorAll(".mode").forEach(b=>b.onclick=()=>{document.querySelectorAll(".mode").forEach(x=>x.classList.remove("active"));b.classList.add("active");mode=b.dataset.mode;log(`Mode changed: ${mode}`);if(watchId!==null)start()});
- $("start").onclick=start;$("stop").onclick=()=>stop();$("addr").onclick=address;$("apply").onclick=applyBounds;$("clear").onclick=clearBounds;
- $("locate").onclick=()=>{if(last)map.setView([last.coords.latitude,last.coords.longitude],16);else log("現在地へ移動: GPSデータなし","WARN")};
- $("follow").onchange=()=>{customBounds=false;log(`GPS auto follow=${$("follow").checked}`)};
- log("アプリ起動");if(location.protocol!=="https:"&&location.hostname!=="localhost")log("GitHub PagesではHTTPSで開いてください","WARN")
+document.addEventListener("DOMContentLoaded",async()=>{
+ try{
+  log("DOM初期化開始");
+  initMap();
+  setupOrientation();
+  await loadWasm();
+
+  const bind=(id,event,fn)=>{
+   const el=$(id);
+   if(!el){log(`要素が見つかりません: #${id}`,"ERROR");return}
+   el.addEventListener(event,fn);
+   log(`イベント登録: #${id} ${event}`);
+  };
+
+  document.querySelectorAll(".mode").forEach(b=>{
+   b.addEventListener("click",()=>{
+    document.querySelectorAll(".mode").forEach(x=>x.classList.remove("active"));
+    b.classList.add("active");
+    mode=b.dataset.mode||"normal";
+    log(`Mode changed: ${mode}`);
+    if(watchId!==null)start();
+   });
+  });
+
+  bind("start","click",start);
+  bind("stop","click",()=>stop());
+  bind("addr","click",address);
+  bind("apply","click",applyBounds);
+  bind("clear","click",clearBounds);
+  bind("locate","click",()=>{
+   if(last)map.setView([last.coords.latitude,last.coords.longitude],16);
+   else log("現在地へ移動: GPSデータなし","WARN");
+  });
+  bind("follow","change",()=>{
+   customBounds=false;
+   log(`GPS auto follow=${$("follow").checked}`);
+  });
+
+  log("アプリ起動・ボタン初期化完了");
+  if(location.protocol!=="https:"&&location.hostname!=="localhost")
+   log("GitHub PagesではHTTPSで開いてください","WARN");
+ }catch(e){
+  console.error(e);
+  log(`初期化エラー: ${e.message}`,"ERROR");
+ }
 });
 })();
